@@ -1,0 +1,3 @@
+Silent in the logs,
+A missing semicolon,
+Server crashes now.
