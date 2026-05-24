@@ -1,4 +1,4 @@
-# DGX Spark Qwen3.5-35B-A3B v2
+# DGX Spark Qwen3.6-35B-A3B v2
 #
 # Optimization stack on top of the SM121-compiled vLLM base:
 #   1. Hybrid INT4+FP8 dense layers  (via inc.py overlay, activated when the
@@ -11,13 +11,13 @@
 #   TORCH_CUDA_ARCH_LIST=12.1a, --tf5 (transformers>=5)
 #
 # Build:
-#   docker build -t vllm-qwen35b-v2 -f docker/Dockerfile.v2 .
+#   docker build -t vllm-qwen36b-v2 -f docker/Dockerfile.v2 .
 #
 # Run (hybrid INT4+FP8 checkpoint, all optimizations):
 #   docker run --gpus all --net=host --ipc=host \
 #     -v ~/models:/models \
-#     vllm-qwen35b-v2 \
-#     serve /models/qwen35b-hybrid-int4fp8 \
+#     vllm-qwen36b-v2 \
+#     serve /models/qwen36b-hybrid-int4fp8 \
 #     --served-model-name qwen --port 8000 --host 0.0.0.0 \
 #     --max-model-len 262144 --gpu-memory-utilization 0.90 \
 #     --reasoning-parser qwen3 --attention-backend FLASHINFER \

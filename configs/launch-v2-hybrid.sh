@@ -7,10 +7,10 @@
 # this optimization delivers +9% but on 35B it's barely measurable.
 #
 # Requires: hybrid checkpoint built via `install.sh --hybrid` at
-#           ~/models/qwen35b-hybrid-int4fp8/
+#           ~/models/qwen36b-hybrid-int4fp8/
 
 PROJECT_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
-HYBRID_MODEL_DIR="${HYBRID_MODEL_DIR:-${HOME}/models/qwen35b-hybrid-int4fp8}"
+HYBRID_MODEL_DIR="${HYBRID_MODEL_DIR:-${HOME}/models/qwen36b-hybrid-int4fp8}"
 
 if [ ! -f "${HYBRID_MODEL_DIR}/model.safetensors.index.json" ]; then
     echo "Error: hybrid checkpoint not found at ${HYBRID_MODEL_DIR}"
@@ -18,14 +18,14 @@ if [ ! -f "${HYBRID_MODEL_DIR}/model.safetensors.index.json" ]; then
     exit 1
 fi
 
-docker run -d --name vllm-qwen35b \
+docker run -d --name vllm-qwen36b \
     --gpus all --net=host --ipc=host \
     -v "${HOME}/models:/models" \
     -v "${HOME}/.cache/huggingface:/root/.cache/huggingface" \
     -v "${PROJECT_DIR}/configs/chat_template.jinja:/opt/unsloth.jinja:ro" \
     -e VLLM_MARLIN_USE_ATOMIC_ADD=1 \
-    vllm-qwen35b-v2 \
-    serve /models/qwen35b-hybrid-int4fp8 \
+    vllm-qwen36b-v2 \
+    serve /models/qwen36b-hybrid-int4fp8 \
     --served-model-name qwen \
     --port 8000 --host 0.0.0.0 \
     --max-model-len 262144 \

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# install.sh — automated build pipeline for DGX Spark Qwen3.5-35B-A3B optimized.
+# install.sh — automated build pipeline for DGX Spark Qwen3.6-35B-A3B optimized.
 #
 # Phases:
-#   0. Download Intel/Qwen3.5-35B-A3B-int4-AutoRound (~18 GB)
-#   1. (optional, --hybrid) Download Qwen/Qwen3.5-35B-A3B-FP8 (~35 GB)
+#   0. Download Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound (~18 GB)
+#   1. (optional, --hybrid) Download Qwen/Qwen3.6-35B-A3B-FP8 (~35 GB)
 #   2. (optional, --hybrid) Build hybrid INT4+FP8 checkpoint (~15-20 min, +1.8% perf)
 #   3. (optional, --hybrid) Add MTP weights back to hybrid checkpoint
 #   4. Ensure vllm-sm121 base image exists (clones eugr/spark-vllm-docker if needed)
-#   5. Build vllm-qwen35b-v2 final image (INT8 LM Head patch + hybrid dispatch)
+#   5. Build vllm-qwen36b-v2 final image (INT8 LM Head patch + hybrid dispatch)
 #
 # Flags:
 #   --hybrid      Build hybrid INT4+FP8 checkpoint (adds +1.8% speed, ~40 GB extra disk, ~20 min)
@@ -16,7 +16,7 @@
 #                 (INT4 + MTP + INT8 LM Head) gives 98% of the total benefit.
 #   --launch      After build, auto-launch the container.
 #   --no-launch   Never launch. Useful for unattended runs.
-#   --no-cache    Wipe existing vllm-qwen35b-v2 image and BuildKit cache, rebuild from scratch.
+#   --no-cache    Wipe existing vllm-qwen36b-v2 image and BuildKit cache, rebuild from scratch.
 #   -h | --help   Print this help and exit.
 #
 # Sudo: this script never invokes sudo. If a prerequisite is missing it prints
@@ -27,7 +27,7 @@ set -euo pipefail
 # ── Paths ─────────────────────────────────────────────────────────────────────
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SPARK_VLLM_DIR="${PROJECT_DIR}/spark-vllm-docker"
-HYBRID_DIR="${HOME}/models/qwen35b-hybrid-int4fp8"
+HYBRID_DIR="${HOME}/models/qwen36b-hybrid-int4fp8"
 SPARK_VLLM_PIN="49d6d9fefd7cd05e63af8b28e4b514e9d30d249f"
 TORCH_NIGHTLY_DATE="20260408"
 TORCH_VERSION="2.12.0.dev${TORCH_NIGHTLY_DATE}+cu130"
@@ -133,19 +133,19 @@ pip install -q -U pip
 pip install -q torch numpy safetensors huggingface_hub
 
 # ── Phase 0: download Intel INT4 ──────────────────────────────────────────────
-step "Phase 0 — Downloading Intel/Qwen3.5-35B-A3B-int4-AutoRound" \
+step "Phase 0 — Downloading Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound" \
      "~18 GB, first time may take 10-20 min; cached: instant"
 
-hf download Intel/Qwen3.5-35B-A3B-int4-AutoRound
-INTEL_DIR=$(hf download Intel/Qwen3.5-35B-A3B-int4-AutoRound --quiet)
+hf download Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound
+INTEL_DIR=$(hf download Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound --quiet)
 [ -d "$INTEL_DIR" ] || abort "INTEL_DIR not found: ${INTEL_DIR}"
 note "INTEL_DIR=${INTEL_DIR}"
 
 # ── Phase 1+2+3: hybrid checkpoint (optional) ────────────────────────────────
 if [ "$BUILD_HYBRID" = "1" ]; then
-    step "Phase 1 — Downloading Qwen/Qwen3.5-35B-A3B-FP8" \
+    step "Phase 1 — Downloading Qwen/Qwen3.6-35B-A3B-FP8" \
          "~35 GB, needed only for hybrid INT4+FP8 build"
-    hf download Qwen/Qwen3.5-35B-A3B-FP8 >/dev/null
+    hf download Qwen/Qwen3.6-35B-A3B-FP8 >/dev/null
 
     # Check if hybrid checkpoint already exists
     if [ -f "${HYBRID_DIR}/model_extra_tensors.safetensors" ] \
@@ -157,7 +157,7 @@ if [ "$BUILD_HYBRID" = "1" ]; then
              "~15-20 min, output ~21 GB at ${HYBRID_DIR}"
         python3 "${PROJECT_DIR}/patches/01-hybrid-int4-fp8/build-hybrid-checkpoint.py" \
             --gptq-dir "${INTEL_DIR}" \
-            --fp8-repo Qwen/Qwen3.5-35B-A3B-FP8 \
+            --fp8-repo Qwen/Qwen3.6-35B-A3B-FP8 \
             --output "${HYBRID_DIR}" \
             --force
 
@@ -168,18 +168,18 @@ if [ "$BUILD_HYBRID" = "1" ]; then
             --target "${HYBRID_DIR}"
     fi
 
-    MODEL_SERVE_PATH="/models/qwen35b-hybrid-int4fp8"
+    MODEL_SERVE_PATH="/models/qwen36b-hybrid-int4fp8"
     MODEL_MOUNT_SRC="$(dirname "${HYBRID_DIR}")"
 else
     note "skipping hybrid build (use --hybrid to enable, adds ~2% speed)"
-    MODEL_SERVE_PATH="Intel/Qwen3.5-35B-A3B-int4-AutoRound"
+    MODEL_SERVE_PATH="Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound"
     MODEL_MOUNT_SRC=""  # no custom mount needed, HF cache is enough
 fi
 
 # ── --no-cache: wipe image and BuildKit cache ────────────────────────────────
 if [ "$NO_CACHE" = "1" ]; then
     log "${C_YEL}--no-cache: removing existing image and pruning BuildKit${C_OFF}"
-    docker rmi -f vllm-qwen35b-v2:latest 2>/dev/null || true
+    docker rmi -f vllm-qwen36b-v2:latest 2>/dev/null || true
     docker builder prune -af >/dev/null 2>&1 || true
 fi
 
@@ -228,14 +228,14 @@ else
 fi
 
 # ── Phase 5: build final image ────────────────────────────────────────────────
-if docker image inspect vllm-qwen35b-v2:latest >/dev/null 2>&1 && [ "$NO_CACHE" = "0" ]; then
-    step "Phase 5 — vllm-qwen35b-v2 image already exists, skipping"
-    note "delete with 'docker rmi vllm-qwen35b-v2' to rebuild, or pass --no-cache"
+if docker image inspect vllm-qwen36b-v2:latest >/dev/null 2>&1 && [ "$NO_CACHE" = "0" ]; then
+    step "Phase 5 — vllm-qwen36b-v2 image already exists, skipping"
+    note "delete with 'docker rmi vllm-qwen36b-v2' to rebuild, or pass --no-cache"
 else
-    step "Phase 5 — Building vllm-qwen35b-v2 final image" \
+    step "Phase 5 — Building vllm-qwen36b-v2 final image" \
          "thin layer over vllm-sm121: INT8 LM Head patch + hybrid INT4+FP8 dispatch"
     cd "${PROJECT_DIR}"
-    docker build -t vllm-qwen35b-v2 -f docker/Dockerfile.v2 .
+    docker build -t vllm-qwen36b-v2 -f docker/Dockerfile.v2 .
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
@@ -244,7 +244,7 @@ ok "${C_GRN}All build steps complete${C_OFF}"
 echo
 log "Images:"
 docker images vllm-sm121     --format '   {{.Repository}}:{{.Tag}}   {{.Size}}' | grep -v '^$' || true
-docker images vllm-qwen35b-v2 --format '   {{.Repository}}:{{.Tag}}   {{.Size}}' | grep -v '^$' || true
+docker images vllm-qwen36b-v2 --format '   {{.Repository}}:{{.Tag}}   {{.Size}}' | grep -v '^$' || true
 echo
 
 # ── Launch (prompt or auto) ──────────────────────────────────────────────────
@@ -257,13 +257,13 @@ build_launch_cmd() {
     fi
 
     cat <<EOF
-docker run -d --name vllm-qwen35b \\
+docker run -d --name vllm-qwen36b \\
     --gpus all --net=host --ipc=host \\
     -v \${HOME}/.cache/huggingface:/root/.cache/huggingface \\
     -v ${CHAT_TEMPLATE_SRC}:/opt/unsloth.jinja:ro \\
     ${mount_model_arg} \\
     -e VLLM_MARLIN_USE_ATOMIC_ADD=1 \\
-    vllm-qwen35b-v2 \\
+    vllm-qwen36b-v2 \\
     serve ${MODEL_SERVE_PATH} \\
     --served-model-name qwen --port 8000 --host 0.0.0.0 \\
     --max-model-len 262144 --max-num-batched-tokens 16384 \\
@@ -291,16 +291,16 @@ EOF
 }
 
 do_launch() {
-    log "Launching vllm-qwen35b..."
-    if docker ps -a --format '{{.Names}}' | grep -qx vllm-qwen35b; then
-        warn "container 'vllm-qwen35b' exists — removing"
-        docker rm -f vllm-qwen35b >/dev/null
+    log "Launching vllm-qwen36b..."
+    if docker ps -a --format '{{.Names}}' | grep -qx vllm-qwen36b; then
+        warn "container 'vllm-qwen36b' exists — removing"
+        docker rm -f vllm-qwen36b >/dev/null
     fi
     eval "$(build_launch_cmd)" || abort "docker run failed"
-    ok "container started. Use 'docker logs -f vllm-qwen35b' to watch startup."
+    ok "container started. Use 'docker logs -f vllm-qwen36b' to watch startup."
     note "endpoint will be: http://127.0.0.1:8000/v1"
-    note "stop: docker stop vllm-qwen35b"
-    note "benchmark: ./bench_qwen35b.sh v2"
+    note "stop: docker stop vllm-qwen36b"
+    note "benchmark: ./bench_qwen36b.sh v2"
 }
 
 case "$LAUNCH_MODE" in

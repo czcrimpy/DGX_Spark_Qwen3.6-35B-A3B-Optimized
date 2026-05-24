@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build a hybrid GPTQ-INT4 + FP8 checkpoint for Qwen3.5-122B-A10B.
+Build a hybrid GPTQ-INT4 + FP8 checkpoint for Qwen3.6-35B-A3B.
 
 Takes MoE expert weights from the GPTQ-INT4 checkpoint (0.5 bytes/param),
 and dense layers (attention, shared experts, embeddings) from the official
@@ -14,9 +14,9 @@ NOTE: Requires the hybrid FP8 dispatch patch from https://github.com/rmstxrx/vll
 
 Usage:
     python build-hybrid-checkpoint.py \
-        --gptq-dir  ~/inference/models/hf/qwen3.5-122b-a10b-gptq-int4 \
-        --fp8-repo  Qwen/Qwen3.5-122B-A10B-FP8 \
-        --output    ~/inference/models/hf/qwen3.5-122b-a10b-fp8hybrid
+        --gptq-dir  ~/inference/models/hf/qwen3.6-35b-a3b-int4-mixed-autoround \
+        --fp8-repo  Qwen/Qwen3.6-35B-A3B-FP8 \
+        --output    ~/inference/models/hf/qwen3.6-35b-a3b-fp8hybrid
 """
 
 import argparse
@@ -352,10 +352,10 @@ def update_config(output_dir: Path) -> None:
     config["_hybrid_quant_info"] = {
         "description": "Hybrid GPTQ-INT4 + FP8 checkpoint for single-GPU deployment",
         "moe_experts": "GPTQ INT4 (group_size=128, sym=True, Marlin kernels)",
-        "dense_layers": "FP8 E4M3 block-128 (from official Qwen/Qwen3.5-122B-A10B-FP8, calibrated scales)",
+        "dense_layers": "FP8 E4M3 block-128 (from official Qwen/Qwen3.6-35B-A3B-FP8, calibrated scales)",
         "norms_gates_embeddings": "Preserved at source dtype (BF16 for norms/gates, FP8 for others)",
-        "source_gptq": "Qwen/Qwen3.5-122B-A10B-GPTQ-Int4",
-        "source_fp8": "Qwen/Qwen3.5-122B-A10B-FP8",
+        "source_gptq": "Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound",
+        "source_fp8": "Qwen/Qwen3.6-35B-A3B-FP8",
         "vllm_patch": "https://github.com/rmstxrx/vllm/tree/v0.17.1-hybrid-fp8",
         "target_hardware": "NVIDIA DGX Spark (GB10, 128GB unified, 273 GB/s)",
         "converter": "build-hybrid-checkpoint.py"
@@ -374,7 +374,7 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Build hybrid GPTQ-INT4 + FP8 checkpoint")
     parser.add_argument("--gptq-dir", required=True, help="Path to GPTQ-INT4 model")
-    parser.add_argument("--fp8-repo", default="Qwen/Qwen3.5-122B-A10B-FP8", help="HF repo for FP8 model")
+    parser.add_argument("--fp8-repo", default="Qwen/Qwen3.6-35B-A3B-FP8", help="HF repo for FP8 model")
     parser.add_argument("--output", required=True, help="Output directory")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(

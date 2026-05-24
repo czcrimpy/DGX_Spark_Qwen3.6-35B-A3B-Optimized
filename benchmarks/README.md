@@ -1,6 +1,6 @@
 # Benchmark Results
 
-All runs use [bench_qwen35b.sh](../bench_qwen35b.sh): 5 prompts (Q&A, Code, JSON, Math, LongCode) × 2 runs at temperature 0.0. Hardware: single NVIDIA DGX Spark (GB10, SM121, 128 GB LPDDR5x).
+All runs use [bench_qwen36b.sh](../bench_qwen36b.sh): 5 prompts (Q&A, Code, JSON, Math, LongCode) × 2 runs at temperature 0.0. Hardware: single NVIDIA DGX Spark (GB10, SM121, 128 GB LPDDR5x).
 
 | File | Config | Avg tok/s | Peak tok/s |
 |---|---|---|---|

@@ -1,8 +1,8 @@
-DGX_Spark_Qwen3.5-35B-A3B-Optimized
+DGX_Spark_Qwen3.6-35B-A3B-Optimized
 Copyright (c) 2026
 
 This project ports and adapts optimization techniques originally developed for
-Qwen3.5-122B in the following project:
+Qwen3.5-122B-A10B in the following project:
 
     albond/DGX_Spark_Qwen3.5-122B-A10B-AR-INT4
     https://github.com/albond/DGX_Spark_Qwen3.5-122B-A10B-AR-INT4
@@ -20,5 +20,5 @@ Underlying technologies:
   - Ray (Apache 2.0): https://github.com/ray-project/ray
 
 Model checkpoints used (not distributed with this repository):
-  - Intel/Qwen3.5-35B-A3B-int4-AutoRound
-  - Qwen/Qwen3.5-35B-A3B-FP8
+  - Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound
+  - Qwen/Qwen3.6-35B-A3B-FP8

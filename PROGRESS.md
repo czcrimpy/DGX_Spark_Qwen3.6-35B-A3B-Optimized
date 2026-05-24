@@ -17,7 +17,7 @@
 
 ### Step 1a — Recipe file ✅
 
-Created `configs/recipes/qwen3.5-35b-a3b-int4-autoround.yaml` matching albond's 122B baseline methodology:
+Created `configs/recipes/qwen3.6-35b-a3b-int4-autoround.yaml` matching albond's 122B baseline methodology:
 - Intel AutoRound INT4 checkpoint
 - FlashInfer attention backend
 - Prefix caching OFF (DeltaNet conflict)
@@ -25,11 +25,11 @@ Created `configs/recipes/qwen3.5-35b-a3b-int4-autoround.yaml` matching albond's 
 
 ### Step 1b — Model download
 
-**Status:** In progress. `Intel/Qwen3.5-35B-A3B-int4-AutoRound` (~18 GB).
+**Status:** In progress. `Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound` (~18 GB).
 
 ### Step 1c — Baseline benchmark ✅
 
-Ran `bench_qwen35b.sh "baseline-intel-int4-autoround"` on 2026-04-14. Results in [benchmarks/01-baseline-intel-int4-autoround.txt](benchmarks/01-baseline-intel-int4-autoround.txt).
+Ran `bench_qwen36b.sh "baseline-intel-int4-autoround"` on 2026-04-14. Results in [benchmarks/01-baseline-intel-int4-autoround.txt](benchmarks/01-baseline-intel-int4-autoround.txt).
 
 ### Step 1d — Results ✅
 
@@ -51,7 +51,7 @@ Ran `bench_qwen35b.sh "baseline-intel-int4-autoround"` on 2026-04-14. Results in
 
 ### Hypothesis (confirmed)
 
-Patch is a runtime monkey-patch targeting vLLM's ubiquitous `logits_processor._get_logits()`. Activation criteria: `lm_head.weight.dtype in (bfloat16, float16) and shape[0] > 100000`. Since Qwen3.5-35B has `vocab_size=248320` and Intel AutoRound keeps `lm_head` in BF16, the patch applies drop-in.
+Patch is a runtime monkey-patch targeting vLLM's ubiquitous `logits_processor._get_logits()`. Activation criteria: `lm_head.weight.dtype in (bfloat16, float16) and shape[0] > 100000`. Since Qwen3.6-35B has `vocab_size=248320` and Intel AutoRound keeps `lm_head` in BF16, the patch applies drop-in.
 
 ### Implementation
 
@@ -173,7 +173,7 @@ Raw data: [benchmarks/04-hybrid-fixed.txt](benchmarks/04-hybrid-fixed.txt).
 Deliverables:
 - `install.sh` (automated Steps 0-4 pipeline)
 - `docker/Dockerfile.v2` (thin layer over vLLM SM121 base)
-- `bench_qwen35b.sh` (adapted benchmark)
+- `bench_qwen36b.sh` (adapted benchmark)
 - `configs/launch-*.sh` (reference launch commands for each config)
 - README with full results table
 - GitHub Actions CI (optional)

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Qwen3.5-35B-A3B benchmark — measures tok/s for different prompt types
-# Usage: ./bench_qwen35b.sh [label]
+# Qwen3.6-35B-A3B benchmark — measures tok/s for different prompt types
+# Usage: ./bench_qwen36b.sh [label]
 #
 # Adapted from albond/DGX_Spark_Qwen3.5-122B-A10B-AR-INT4/bench_qwen35.sh
 # (same 5 scenarios, same temperature, same methodology for apples-to-apples
@@ -41,7 +41,7 @@ bench() {
 }
 
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║  Qwen3.5-35B-A3B Benchmark: $LABEL"
+echo "║  Qwen3.6-35B-A3B Benchmark: $LABEL"
 echo "║  $(date)"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""

@@ -1,24 +1,24 @@
 # Phase 0 — Discovery Report
 
 **Date:** 2026-04-14
-**Goal:** Determine feasibility of porting albond's v2 optimizations from Qwen3.5-122B to Qwen3.5-35B-A3B.
+**Goal:** Determine feasibility of porting albond's v2 optimizations from Qwen3.5-122B-A10B to Qwen3.6-35B-A3B.
 
 ## 1. Checkpoint Availability
 
 | Checkpoint | Status | Notes |
 |---|---|---|
-| `Intel/Qwen3.5-35B-A3B-int4-AutoRound` | **EXISTS** | 23 likes, 27K downloads. 11 shards + `model_extra_tensors.safetensors` + `quantization_config.json` |
-| `Qwen/Qwen3.5-35B-A3B-FP8` | **EXISTS** | 143 likes, 1.93M downloads. 14 shards |
-| `Qwen/Qwen3.5-35B-A3B` (base BF16) | **EXISTS** | MTP tensors embedded inline |
-| `cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit` | EXISTS | 39 likes |
-| `QuantTrio/Qwen3.5-35B-A3B-AWQ` | EXISTS | 17 likes |
-| `Qwen/Qwen3.5-35B-A3B-GPTQ-Int4` | EXISTS (official) | 71 likes, 675K downloads |
+| `Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound` | **EXISTS** | 23 likes, 27K downloads. 11 shards + `model_extra_tensors.safetensors` + `quantization_config.json` |
+| `Qwen/Qwen3.6-35B-A3B-FP8` | **EXISTS** | 143 likes, 1.93M downloads. 14 shards |
+| `Qwen/Qwen3.6-35B-A3B` (base BF16) | **EXISTS** | MTP tensors embedded inline |
+| `cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit` | EXISTS | 39 likes |
+| `QuantTrio/Qwen3.6-35B-A3B-AWQ` | EXISTS | 17 likes |
+| `Qwen/Qwen3.6-35B-A3B-GPTQ-Int4` | EXISTS (official) | 71 likes, 675K downloads |
 
 **Conclusion:** Both checkpoints albond uses (Intel AutoRound + Qwen FP8) exist for 35B-A3B. Hybrid INT4+FP8 technique applies directly.
 
 ## 2. MTP (Multi-Token Prediction) Support
 
-- Base `Qwen/Qwen3.5-35B-A3B` embeds MTP tensors **inline in main shards** (differs from 122B's separate file)
+- Base `Qwen/Qwen3.6-35B-A3B` embeds MTP tensors **inline in main shards** (differs from 122B's separate file)
 - Total 1811 tensors, **785 MTP tensors** (same count as 122B)
 - Config has `mtp_num_hidden_layers: 1` and `mtp_use_dedicated_embeddings: false`
 - Sample keys: `mtp.fc.weight`, `mtp.layers.0.self_attn.q_proj.weight`, `mtp.layers.0.mlp.experts.0.down_proj.weight`
@@ -72,7 +72,7 @@
 
 ## Sources
 
-- https://huggingface.co/Intel/Qwen3.5-35B-A3B-int4-AutoRound
-- https://huggingface.co/Qwen/Qwen3.5-35B-A3B-FP8
-- https://huggingface.co/Qwen/Qwen3.5-35B-A3B
+- https://huggingface.co/Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound
+- https://huggingface.co/Qwen/Qwen3.6-35B-A3B-FP8
+- https://huggingface.co/Qwen/Qwen3.6-35B-A3B
 - albond repo: https://github.com/albond/DGX_Spark_Qwen3.5-122B-A10B-AR-INT4

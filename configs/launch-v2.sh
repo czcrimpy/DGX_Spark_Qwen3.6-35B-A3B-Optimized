@@ -5,13 +5,13 @@
 
 PROJECT_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
 
-docker run -d --name vllm-qwen35b \
+docker run -d --name vllm-qwen36b \
     --gpus all --net=host --ipc=host \
     -v "${HOME}/.cache/huggingface:/root/.cache/huggingface" \
     -v "${PROJECT_DIR}/configs/chat_template.jinja:/opt/unsloth.jinja:ro" \
     -e VLLM_MARLIN_USE_ATOMIC_ADD=1 \
-    vllm-qwen35b-v2 \
-    serve Intel/Qwen3.5-35B-A3B-int4-AutoRound \
+    vllm-qwen36b-v2 \
+    serve Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound \
     --served-model-name qwen \
     --port 8000 --host 0.0.0.0 \
     --max-model-len 262144 \

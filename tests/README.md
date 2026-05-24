@@ -7,7 +7,7 @@ Deterministic output comparison between baseline (Intel INT4 + FlashInfer only) 
 - 5 fixed prompts spanning different task types (factual, code, JSON, math, creative)
 - `temperature=0.0`, `seed=42`
 - `enable_thinking=false` to compare final output only (thinking traces are long and amplify tiny probabilistic differences that would make the test misleading)
-- Same model (`Intel/Qwen3.5-35B-A3B-int4-AutoRound`) in both cases — the optimizations are runtime/architectural, not a different model
+- Same model (`Intel/Qwen3.6-35B-A3B-int4-mixed-AutoRound`) in both cases — the optimizations are runtime/architectural, not a different model
 
 ## Running
 

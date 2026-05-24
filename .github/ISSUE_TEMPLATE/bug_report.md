@@ -21,10 +21,10 @@ What happened vs. what you expected.
 
 **Logs**
 ```
-paste relevant `docker logs vllm-qwen35b` output
+paste relevant `docker logs vllm-qwen36b` output
 ```
 
 **Benchmark output (if applicable)**
 ```
-paste `./bench_qwen35b.sh` output
+paste `./bench_qwen36b.sh` output
 ```
