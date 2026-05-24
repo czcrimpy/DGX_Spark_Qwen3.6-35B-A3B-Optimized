@@ -20,7 +20,7 @@ Benchmarked on a single NVIDIA DGX Spark (GB10, SM121, 128 GB LPDDR5x) running [
 ## Quick Start
 
 ```bash
-git clone https://github.com/yunusshin/DGX_Spark_Qwen3.6-35B-A3B-Optimized.git
+git clone https://github.com/czcrimpy/DGX_Spark_Qwen3.6-35B-A3B-Optimized.git
 cd DGX_Spark_Qwen3.6-35B-A3B-Optimized
 ./install.sh --launch
 ```
