@@ -211,6 +211,13 @@ else
     sed -i "s|uv pip install torch torchvision torchaudio triton --index-url https://download.pytorch.org/whl/nightly/cu130|uv pip install torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} torchaudio==${TORCHAUDIO_VERSION} triton --index-url https://download.pytorch.org/whl/nightly/cu130|g" \
         "${SPARK_VLLM_DIR}/Dockerfile"
 
+    # Let uv wait longer on NVIDIA wheels (pypi.nvidia.com can be slow/flaky on aarch64)
+    uv_timeout_block=$'ENV UV_HTTP_TIMEOUT=600\nENV UV_HTTP_RETRIES=10'
+    if ! grep -q '^ENV UV_HTTP_TIMEOUT=' "${SPARK_VLLM_DIR}/Dockerfile"; then
+        sed -i "/^RUN --mount=type=cache,id=uv-cache,target=\\/root\\/\.cache\\/uv/i ${uv_timeout_block}" \
+            "${SPARK_VLLM_DIR}/Dockerfile"
+    fi
+
     # Suppress CUTLASS×CUDA13 deprecation spam
     if ! grep -q 'NVCC_APPEND_FLAGS' "${SPARK_VLLM_DIR}/Dockerfile"; then
         sed -i '/^ENV TORCH_CUDA_ARCH_LIST=/a ENV NVCC_APPEND_FLAGS="-Xcompiler=-Wno-deprecated-declarations -diag-suppress=20012 -diag-suppress=20013 -diag-suppress=20014 -diag-suppress=20015"' \
